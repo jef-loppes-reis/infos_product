@@ -47,7 +47,7 @@ if __name__ == '__main__':
                 system('cls')
                 parsed = loads(result)
                 for title, item in parsed.items():
-                    print(f'{title.upper()}: {item}')
+                    print(f'{Cores.ITALICO}{Cores.SUBLINHADO}{title.upper()}{Cores.RESET}: {item}')
                 # print(dumps(parsed, indent=4))
                 input(f'\n{Cores.VERDE_CLARO}Pressione qualquer tecla para continuar...{Cores.RESET}')
             except KeyError:
