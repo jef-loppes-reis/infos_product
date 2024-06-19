@@ -39,14 +39,16 @@ if __name__ == '__main__':
         QUERY = fp.read()
 
     while True:
-        cod = input(f'\n{Cores.SUBLINHADO}\
-                    Digite o CODPRO (Codigo interno do produto):{Cores.RESET} ').strip()
+        cod = input(f'\n{Cores.SUBLINHADO}Digite o CODPRO (Codigo interno do produto):{Cores.RESET} ').strip()
         if cod.isnumeric():
             try:
+                print('\nCarregando...')
                 result = re(QUERY, cod).to_json()
+                system('cls')
                 parsed = loads(result)
-                print('')
-                print(dumps(parsed, indent=4))
+                for title, item in parsed.items():
+                    print(f'{title.upper()}: {item}')
+                # print(dumps(parsed, indent=4))
                 input(f'\n{Cores.VERDE_CLARO}Pressione qualquer tecla para continuar...{Cores.RESET}')
             except KeyError:
                 system('cls')
