@@ -1,10 +1,11 @@
 SELECT produto.produto as titulo,
     produto.codpro as codigo_interno,
     produto.codpro as sku,
+	produto.fantasia as marca,
     tb_multiplo.multiplo,
-    ROUND(prd_tipo.p_venda * 1.35504, 2) as vl_uni,
+    ROUND(tb_prd_tipo.p_venda * 1.35504, 2) as vl_uni,
     ROUND(
-        prd_tipo.p_venda * 1.35504 * tb_multiplo.multiplo::int,
+        tb_prd_tipo.p_venda * 1.35504 * tb_multiplo.multiplo::int,
         2
     ) as vl_total,
     ROUND(
@@ -21,7 +22,12 @@ FROM "D-1".produto
             END as multiplo
         FROM "D-1".produto
     ) as tb_multiplo ON produto.codpro = tb_multiplo.codpro
-    LEFT JOIN "D-1".prd_tipo ON produto.codpro = prd_tipo.codpro
+    LEFT JOIN (
+        SELECT prd_tipo.codpro,
+            prd_tipo.p_venda
+        FROM "D-1".prd_tipo
+        WHERE cd_tploja = '01'
+    ) as tb_prd_tipo ON produto.codpro = tb_prd_tipo.codpro
     LEFT JOIN (
         SELECT codpro,
             SUM(estoque) as estoque
