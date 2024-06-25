@@ -3,7 +3,8 @@ from os import system, path
 from json import loads, dumps
 
 from ecomm import Postgres
-from print_cores import Cores
+from psycopg import OperationalError
+from rich import print, print_json
 
 
 def re(query:str, codpro:str) -> str:
@@ -39,17 +40,20 @@ if __name__ == '__main__':
         QUERY = fp.read()
 
     while True:
-        cod = input(f'\n{Cores.SUBLINHADO}Digite o CODPRO (Codigo interno do produto):{Cores.RESET} ').strip()
+        cod = input('\nDigite o CODPRO (Codigo interno do produto): ').strip()
         if cod.isnumeric():
             try:
                 print('\nCarregando...')
                 result = re(QUERY, cod).to_json()
                 system('cls')
                 parsed = loads(result)
-                for title, item in parsed.items():
-                    print(f'{Cores.ITALICO}{Cores.SUBLINHADO}{title.upper()}{Cores.RESET}: {item}')
-                # print(dumps(parsed, indent=4))
-                input(f'\n{Cores.VERDE_CLARO}Pressione qualquer tecla para continuar...{Cores.RESET}')
+                # for title, item in parsed.items():
+                #     print(f'{title.upper()}: {item}')
+                print_json(dumps(parsed, indent=4))
+                input('\nPressione qualquer tecla para continuar...')
             except KeyError:
                 system('cls')
-                print(f'\n{Cores.AMARELO}Codigo do produto nao encontrado!{Cores.RESET}')
+                print('\nCodigo do produto nao encontrado!')
+            except OperationalError:
+                print('Algo de errado, com a conexao com o BD. Tente novamente mais tarde !')
+                input('Precione qualquer tecla para sair...')
