@@ -80,22 +80,3 @@ if __name__ == '__main__':
         except OperationalError:
             rprint('[red3]Algo de errado, com a conexao com o BD. Tente novamente mais tarde ![/red3]')
             input('[bright_yellow]Precione ENTER para sair...[/bright_yellow]')
-
-
-    # op: bool = True
-    # tentativas = 0
-    # while True:
-    #     cod: str = input('\nDigite o CODPRO ou SKU: ').strip()
-    #     # if cod.isnumeric():
-    #     try:
-    #         print('\nCarregando...')
-    #         result: dict | None = re(QUERY, cod, op).to_json()
-    #         # system('cls')
-    #         parsed: dict = loads(result)
-    #         # for title, item in parsed.items():
-    #         #     print(f'{title.upper()}: {item}')
-    #         print_json(dumps(parsed, indent=4))
-    #         input('\nPressione qualquer tecla para continuar...')
-    #     except OperationalError:
-    #         print('Algo de errado, com a conexao com o BD. Tente novamente mais tarde !')
-    #         input('Precione qualquer tecla para sair...')
