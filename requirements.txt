@@ -1,22 +1,26 @@
 certifi==2024.2.2
 charset-normalizer==3.3.2
 colorama==0.4.6
-db @ git+https://github.com/E-commerce-Pecista/db-connection.git
-ecomm @ git+https://github.com/E-commerce-Pecista/ecomm-tools
+db @ git+https://github.com/E-commerce-Pecista/db-connection.git@467278be13633642dabb8989ac5de150ad8dfcdb
+ecomm @ git+https://github.com/E-commerce-Pecista/ecomm-tools@4d389836cc3967d4a476acf8c8881a7858c10f19
 et-xmlfile==1.1.0
 idna==3.6
-ml @ git+https://github.com/E-commerce-Pecista/ml-interface.git
+markdown-it-py==3.0.0
+mdurl==0.1.2
+ml @ git+https://github.com/E-commerce-Pecista/ml-interface.git@0e769454cd4297436fabfcd2e641a93e6baecf63
 mysql-connector-python==8.3.0
 numpy==1.26.4
 openpyxl==3.1.2
 pandas==2.2.1
-print-cores @ git+https://github.com/jef-loppes-reis/print_cores
+print-cores @ git+https://github.com/jef-loppes-reis/print_cores@307894447f555f08bdde0809a09cdef50b620e22
 psycopg==3.1.18
 psycopg-binary==3.1.18
+Pygments==2.18.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.1
 requests==2.31.0
+rich==13.7.1
 six==1.16.0
 tqdm==4.66.2
 typing_extensions==4.10.0
