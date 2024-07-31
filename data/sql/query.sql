@@ -36,5 +36,5 @@ FROM "D-1".produto
     ) as tb_estoque ON produto.codpro = tb_estoque.codpro
     LEFT JOIN "D-1".prd_gtin ON produto.codpro = prd_gtin.cd_produto
     LEFT JOIN "D-1".original ON produto.num_orig = original.nu_origina
-WHERE produto.codpro = '%s'
+WHERE produto.'%s' = '%s'
 ORDER BY dt_cadast DESC;
