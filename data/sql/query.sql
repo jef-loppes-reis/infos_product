@@ -1,7 +1,9 @@
 SELECT produto.produto as titulo,
     produto.codpro as codigo_interno,
     produto.codpro as sku,
+    produto.num_fab as sku_fabrica,
 	produto.fantasia as marca,
+    produto.classifica as ncm,
     tb_multiplo.multiplo,
     ROUND(tb_prd_tipo.p_venda * 1.35504, 2) as vl_uni,
     ROUND(
