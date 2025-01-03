@@ -34,6 +34,7 @@ FROM "D-1".produto
         SELECT codpro,
             SUM(estoque) as estoque
         FROM "H-1".prd_loja
+        WHERE NOT prd_loja.cd_loja in ('08')
         GROUP BY codpro
     ) as tb_estoque ON produto.codpro = tb_estoque.codpro
     LEFT JOIN "D-1".prd_gtin ON produto.codpro = prd_gtin.cd_produto
