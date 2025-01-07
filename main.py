@@ -51,7 +51,9 @@ class InfosProduct:
                 df_aux: DataFrame = df_db.loc[0].copy()
                 df_aux['tipo_anuncio'] = None
                 df_aux['tipo_anuncio'] = 'CLASSICO' if df_aux.vl_total < 41 else 'PREMIUM'
-                df_aux['oem'] = ', '.join(set(df_db.oem)) if len(df_db.oem) > 1 else ''
+                df_aux['oem'] = ', '.join(set(df_db.oem)) if not df_db.oem.loc[~df_db.oem.isna()].empty else '-'
+                df_aux['codigo_barras'] = ', '.join(set(df_db.codigo_barras)) if not df_db.codigo_barras.loc[~df_db.codigo_barras.isna()].empty else '-'
+                df_aux['sku'] = f'{df_db.multiplo.values[0]}X[{df_db.sku.values[0]}]' if int(df_db.multiplo.values[0]) > 1 else df_db.sku.values[0]
                 return df_aux
             # Tentativa com NUM_FAB
             df_db: DataFrame = db.query(self.get_query(type_op_codpro=False))
@@ -59,7 +61,9 @@ class InfosProduct:
                 df_aux: DataFrame = df_db.loc[0].copy()
                 df_aux['tipo_anuncio'] = None
                 df_aux['tipo_anuncio'] = 'CLASSICO' if df_aux.vl_total < 41 else 'PREMIUM'
-                df_aux['oem'] = ', '.join(set(df_db.oem)) if len(df_db.oem) > 1 else ''
+                df_aux['oem'] = ', '.join(set(df_db.oem)) if not df_db.oem.loc[~df_db.oem.isna()].empty else '-'
+                df_aux['codigo_barras'] = ', '.join(set(df_db.codigo_barras)) if not df_db.codigo_barras.loc[~df_db.codigo_barras.isna()].empty else '-'
+                df_aux['sku'] = f'{df_db.multiplo.values[0]}X[{df_db.sku.values[0]}]' if int(df_db.multiplo.values[0]) > 1 else df_db.sku.values[0]
                 return df_aux
             # Caso nada retorna vazio
             return DataFrame()
