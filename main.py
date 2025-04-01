@@ -20,6 +20,37 @@ class InfosProduct:
     def __init__(self, codpro_sku: str) -> None:
         self._codpro_sku: str = codpro_sku
 
+    def __definir_tarifa(self, valor: float) -> float:
+        """
+        definir_tarifa A regra e definiada com o valor do produto somado com a porcentagem 1.35504.
+        Nao deve jogar somente o valor do "p_venda" Preco KAIZEN.
+
+        Args:
+            valor (float): Valor P_VENDA * 1.35504
+
+        Returns:
+            float: Taxa do produto.
+        """
+        if 0.0 <= valor < 21.9:
+            return 7.10
+        if 21.9 <= valor < 42.61:
+            return 7.39
+        if 42.61 <= valor < 50.92:
+            return 8.13
+        return 0
+
+    def __markup(self, tipo_anuncio: str = 'PREMIUM') -> float:
+        match tipo_anuncio:
+            case 'PREMIUM':
+                return 1.35504
+            case 'CLASSICO':
+                return 1.27804
+            case 'fulfillment':
+                return 1.37504
+            case 'gold_special_full':
+                return 1.27804
+            case _:
+                return 1.35504
 
     def get_query(self, type_op_codpro: bool) -> str:
         _query: str = self._query_archive%('codpro', self._codpro_sku)
@@ -50,7 +81,10 @@ class InfosProduct:
             if not df_db.empty:
                 df_aux: DataFrame = df_db.loc[0].copy()
                 df_aux['tipo_anuncio'] = None
-                df_aux['tipo_anuncio'] = 'CLASSICO' if df_aux.vl_total < 41 else 'PREMIUM'
+                df_aux['tipo_anuncio'] = 'CLASSICO' if df_aux.vl_total_siac < 41 else 'PREMIUM'
+                df_aux['vl_ml'] = float(df_aux['vl_total_siac']) * float(self.__markup(df_aux['tipo_anuncio']))
+                df_aux['vl_ml'] = df_aux['vl_ml'] + self.__definir_tarifa(df_aux['vl_ml'])
+                df_aux['vl_ml'] = round(df_aux['vl_ml'], 2)
                 df_aux['oem'] = ', '.join(set(df_db.oem)) if not df_db.oem.loc[~df_db.oem.isna()].empty else '-'
                 df_aux['codigo_barras'] = ', '.join(set(df_db.codigo_barras)) if not df_db.codigo_barras.loc[~df_db.codigo_barras.isna()].empty else '-'
                 df_aux['sku'] = f'{df_db.multiplo.values[0]}X[{df_db.sku.values[0]}]' if int(df_db.multiplo.values[0]) > 1 else df_db.sku.values[0]
@@ -61,6 +95,9 @@ class InfosProduct:
                 df_aux: DataFrame = df_db.loc[0].copy()
                 df_aux['tipo_anuncio'] = None
                 df_aux['tipo_anuncio'] = 'CLASSICO' if df_aux.vl_total < 41 else 'PREMIUM'
+                df_aux['vl_ml'] = float(df_aux['vl_total_siac']) * float(self.__markup(df_aux['tipo_anuncio']))
+                df_aux['vl_ml'] = df_aux['vl_ml'] + self.__definir_tarifa(df_aux['vl_ml'])
+                df_aux['vl_ml'] = round(df_aux['vl_ml'], 2)
                 df_aux['oem'] = ', '.join(set(df_db.oem)) if not df_db.oem.loc[~df_db.oem.isna()].empty else '-'
                 df_aux['codigo_barras'] = ', '.join(set(df_db.codigo_barras)) if not df_db.codigo_barras.loc[~df_db.codigo_barras.isna()].empty else '-'
                 df_aux['sku'] = f'{df_db.multiplo.values[0]}X[{df_db.sku.values[0]}]' if int(df_db.multiplo.values[0]) > 1 else df_db.sku.values[0]
