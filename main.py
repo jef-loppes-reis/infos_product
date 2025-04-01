@@ -7,15 +7,9 @@ from psycopg import OperationalError
 from pandas import DataFrame
 from rich import print as rprint, print_json
 
+from query import query_db
 
 class InfosProduct:
-
-    with open(
-        file=path.join(path.dirname(__file__), 'data/sql/query.sql'),
-        mode='r',
-        encoding='utf-8'
-    ) as fp:
-        _query_archive: str = fp.read()
 
     def __init__(self, codpro_sku: str) -> None:
         self._codpro_sku: str = codpro_sku
@@ -53,7 +47,7 @@ class InfosProduct:
                 return 1.35504
 
     def get_query(self, type_op_codpro: bool) -> str:
-        _query: str = self._query_archive%('codpro', self._codpro_sku)
+        _query: str = query_db % ('codpro', self._codpro_sku)
         _query = _query.replace(
             "WHERE produto.'codpro'",
             'WHERE produto.codpro'
@@ -61,7 +55,6 @@ class InfosProduct:
                 "WHERE produto.'codpro'",
                 'WHERE produto.num_fab'
             )
-
         return _query
 
 
