@@ -1,6 +1,7 @@
 """---"""
-from os import system, path
-from json import loads, dumps
+import signal
+import sys
+from json import dumps
 
 from ecomm import Postgres
 from psycopg import OperationalError
@@ -25,7 +26,9 @@ class InfosProduct:
         Returns:
             float: Taxa do produto.
         """
-        if 0.0 <= valor < 21.9:
+        if 0.48 <= valor < 6.25:
+            return valor
+        if 6.25 <= valor < 21.9:
             return 7.10
         if 21.9 <= valor < 42.61:
             return 7.39
@@ -42,7 +45,7 @@ class InfosProduct:
             case 'fulfillment':
                 return 1.37504
             case 'gold_special_full':
-                return 1.27804
+                return 1.29804
             case _:
                 return 1.35504
 
@@ -58,7 +61,7 @@ class InfosProduct:
         return _query
 
 
-    def re(self) -> DataFrame:
+    def re(self) -> dict:
         """_summary_
 
         Args:
@@ -69,48 +72,48 @@ class InfosProduct:
             str: _description_
         """
         with Postgres() as db:
-            # Tentativa com CODPRO
-            df_db: DataFrame = db.query(self.get_query(type_op_codpro=True))
+            df_db: DataFrame = db.query(self.get_query(type_op_codpro=bool(True) if self._codpro_sku.isnumeric() else False))
             if not df_db.empty:
-                df_aux: DataFrame = df_db.loc[0].copy()
-                df_aux['tipo_anuncio'] = None
-                df_aux['tipo_anuncio'] = 'CLASSICO' if df_aux.vl_total_siac < 41 else 'PREMIUM'
-                df_aux['vl_ml'] = float(df_aux['vl_total_siac']) * float(self.__markup(df_aux['tipo_anuncio']))
-                df_aux['vl_ml'] = df_aux['vl_ml'] + self.__definir_tarifa(df_aux['vl_ml'])
-                df_aux['vl_ml'] = round(df_aux['vl_ml'], 2)
-                df_aux['oem'] = ', '.join(set(df_db.oem)) if not df_db.oem.loc[~df_db.oem.isna()].empty else '-'
-                df_aux['codigo_barras'] = ', '.join(set(df_db.codigo_barras)) if not df_db.codigo_barras.loc[~df_db.codigo_barras.isna()].empty else '-'
-                df_aux['sku'] = f'{df_db.multiplo.values[0]}X[{df_db.sku.values[0]}]' if int(df_db.multiplo.values[0]) > 1 else df_db.sku.values[0]
-                return df_aux
-            # Tentativa com NUM_FAB
-            df_db: DataFrame = db.query(self.get_query(type_op_codpro=False))
-            if not df_db.empty:
-                df_aux: DataFrame = df_db.loc[0].copy()
-                df_aux['tipo_anuncio'] = None
-                df_aux['tipo_anuncio'] = 'CLASSICO' if df_aux.vl_total < 41 else 'PREMIUM'
-                df_aux['vl_ml'] = float(df_aux['vl_total_siac']) * float(self.__markup(df_aux['tipo_anuncio']))
-                df_aux['vl_ml'] = df_aux['vl_ml'] + self.__definir_tarifa(df_aux['vl_ml'])
-                df_aux['vl_ml'] = round(df_aux['vl_ml'], 2)
-                df_aux['oem'] = ', '.join(set(df_db.oem)) if not df_db.oem.loc[~df_db.oem.isna()].empty else '-'
-                df_aux['codigo_barras'] = ', '.join(set(df_db.codigo_barras)) if not df_db.codigo_barras.loc[~df_db.codigo_barras.isna()].empty else '-'
-                df_aux['sku'] = f'{df_db.multiplo.values[0]}X[{df_db.sku.values[0]}]' if int(df_db.multiplo.values[0]) > 1 else df_db.sku.values[0]
-                return df_aux
-            # Caso nada retorna vazio
-            return DataFrame()
+                df_aux_data: dict = df_db.loc[[0]].squeeze().to_dict().copy()
+                df_aux_data['vl_uni_siac'] = float(df_aux_data.get('vl_uni_siac', 0.0))
+                df_aux_data['vl_total_siac'] = float(df_aux_data.get('vl_total_siac', 0.0))
+                df_aux_data['tipo_anuncio'] = None
+                df_aux_data['tipo_anuncio'] = 'CLASSICO' if df_aux_data.get('vl_total_siac', 0.0) < 41 else 'PREMIUM'
+                df_aux_data['vl_ml'] = float(df_aux_data.get('vl_total_siac', 0.0)) * float(self.__markup(df_aux_data.get('tipo_anuncio', '')))
+                df_aux_data['vl_ml'] = df_aux_data.get('vl_ml', 0.0) + self.__definir_tarifa(df_aux_data.get('vl_ml', 0.0))
+                df_aux_data['vl_ml'] = round(df_aux_data.get('vl_ml', 0.0), 2)
+                df_aux_data['oem'] = ', '.join(set(df_db.oem)) if not df_db.oem.loc[~df_db.oem.isna()].empty else '-'
+                df_aux_data['codigo_barras'] = ', '.join(set(df_db.codigo_barras)) if not df_db.codigo_barras.loc[~df_db.codigo_barras.isna()].empty else '-'
+                df_aux_data['sku'] = f'{df_db.multiplo.values[0]}X[{df_db.sku.values[0]}]' if int(df_db.multiplo.values[0]) > 1 else df_db.sku.values[0]
+                return df_aux_data
+            return {}
 
+# Metodo Graceful Shutdown
+SHUTDOWN_FLAG: bool = False
+
+def signal_handler(sig, frame):
+    global SHUTDOWN_FLAG
+    rprint('[yellow]Recebido sinal para encerrar o programa. Finalizando...[/yellow]')
+    SHUTDOWN_FLAG = True
 
 if __name__ == '__main__':
-    # system('cls')
+    # Usp metodo Graceful Shutdown
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
-    while True:
-        cod: str = input('\nDigite o CODPRO ou SKU: ').strip()
+    while not SHUTDOWN_FLAG:
         try:
+            cod: str = input('\nDigite o CODPRO ou SKU: ').strip()
+            if SHUTDOWN_FLAG:
+                break
             infos_product: InfosProduct = InfosProduct(codpro_sku=cod)
-            result: dict = infos_product.re().to_json()
-            parsed: dict = loads(result)
-            print_json(dumps(parsed, indent=4))
-            rprint('[bright_yellow]Pressione ENTER para continuar...[/bright_yellow]')
-            input()
+            result: dict = infos_product.re()
+            print_json(dumps(result))
         except OperationalError:
-            rprint('[red3]Algo de errado, com a conexao com o BD. Tente novamente mais tarde ![/red3]')
-            input('[bright_yellow]Precione ENTER para sair...[/bright_yellow]')
+            rprint('[red3]Algo de errado com a conexao com o BD. Tente novamente mais tarde ![/red3]')
+        except KeyboardInterrupt:
+            rprint('\n[yellow]Interrupção recebida pelo usuário. Finalizando...[/yellow]')
+            break
+
+    rprint('[green]Programa finalizado com sucesso.[/green]')
+    sys.exit(0)
