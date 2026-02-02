@@ -3,11 +3,11 @@ name = "infos-product"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
-    "ecomm",
-    "rich>=14.0.0",
+    "ecomm_postgres",
+    "rich>=14.3.2",
 ]
 
 [tool.uv.sources]
-ecomm = { git = "https://github.com/E-commerce-Pecista/ecomm-tools" }
+ecomm_postgres = { git = "https://github.com/E-commerce-Pecista/ecomm-postgres" }
